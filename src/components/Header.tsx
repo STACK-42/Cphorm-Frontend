@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import cphormLogo from "@/assets/cphorm-logo.png";
 
 const Header = () => {
@@ -15,27 +16,23 @@ const Header = () => {
         </div>
         
         <nav className="hidden md:flex items-center space-x-8">
-          <a 
-            href="#" 
+          <Link 
+            to="/" 
             className="text-foreground hover:text-primary transition-colors font-medium"
           >
             Home
-          </a>
-          <a 
-            href="#features" 
+          </Link>
+          <Link 
+            to="/login" 
             className="text-foreground hover:text-primary transition-colors font-medium"
           >
-            Features
-          </a>
-          <a 
-            href="#contact" 
-            className="text-foreground hover:text-primary transition-colors font-medium"
-          >
-            Contact
-          </a>
-          <Button variant="outline" size="sm">
             Login
-          </Button>
+          </Link>
+          <Link to="/signup">
+            <Button variant="outline" size="sm">
+              Sign Up
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile menu button */}
