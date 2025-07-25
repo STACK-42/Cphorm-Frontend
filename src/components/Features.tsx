@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const Features = () => {
   const features = [
     {
-      title: "AI-Powered Diagnostics",
-      description: "Advanced machine learning algorithms assist healthcare providers with accurate and rapid diagnostic insights.",
-      icon: "🧠"
+      title: "Health Data Insights",
+      description: "Advanced analytics and data visualization tools to track disease patterns and healthcare trends.",
+      icon: "📊"
     },
     {
       title: "Patient Management",
@@ -18,9 +18,9 @@ const Features = () => {
       icon: "🔒"
     },
     {
-      title: "Real-time Analytics",
-      description: "Insights and reporting tools to optimize healthcare operations and improve patient outcomes.",
-      icon: "📊"
+      title: "Disease Surveillance",
+      description: "Real-time monitoring and reporting tools to track disease outbreaks and health trends across regions.",
+      icon: "🔍"
     },
     {
       title: "Mobile Access",
