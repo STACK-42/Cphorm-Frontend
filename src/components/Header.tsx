@@ -26,7 +26,7 @@ const Header = () => {
             to="/insights" 
             className="text-foreground hover:text-primary transition-colors font-medium"
           >
-            Insights
+            Explore Data
           </Link>
           <Link 
             to="/login" 
