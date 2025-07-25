@@ -43,8 +43,8 @@ const Login = () => {
         description: "Welcome back!",
       });
 
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Redirect to manage forms page
+      navigate('/manage-forms');
     } catch (error: any) {
       setError('Login failed: ' + error.message);
     } finally {
