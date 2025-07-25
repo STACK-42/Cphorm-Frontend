@@ -23,6 +23,12 @@ const Header = () => {
             Home
           </Link>
           <Link 
+            to="/insights" 
+            className="text-foreground hover:text-primary transition-colors font-medium"
+          >
+            Insights
+          </Link>
+          <Link 
             to="/login" 
             className="text-foreground hover:text-primary transition-colors font-medium"
           >
