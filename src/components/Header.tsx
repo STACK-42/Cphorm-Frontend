@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import cphormLogo from "@/assets/cphorm-logo.png";
+import logo from "@/assets/logo.svg";
 
 const Header = () => {
   return (
@@ -8,8 +8,8 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <img 
-            src={cphormLogo} 
-            alt="Cphorm Logo" 
+            src={logo} 
+            alt="Logo" 
             className="h-12 w-auto"
           />
           <span className="text-xl font-bold text-midnight">Cphorm</span>
