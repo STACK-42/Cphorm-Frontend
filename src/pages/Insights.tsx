@@ -115,7 +115,7 @@ const Insights = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Activity className="h-6 w-6 text-cool-blue" />
-            <h1 className="text-2xl font-bold text-midnight">Sudan Disease Surveillance Dashboard</h1>
+            <h1 className="text-2xl font-bold text-midnight">Cphorm Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
             <Select value={selectedYear} onValueChange={setSelectedYear}>
@@ -303,7 +303,7 @@ const Insights = () => {
 
       <footer className="bg-card border-t border-border py-6 mt-12">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-muted-foreground">Sudan Ministry of Health | Disease Surveillance System | Data as of July 2024</p>
+          <p className="text-muted-foreground">Cphorm Analytics | Disease Surveillance System | Data as of July 2025</p>
           <p className="text-sm text-muted-foreground mt-1">Note: This dashboard displays simulated data for demonstration purposes only.</p>
         </div>
       </footer>
