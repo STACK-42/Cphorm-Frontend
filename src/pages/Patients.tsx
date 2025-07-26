@@ -47,7 +47,6 @@ const Patients = () => {
       <div className="sidebar bg-white w-64 flex-shrink-0 shadow-md h-full z-10 hidden md:block">
         <div className="p-4 border-b border-gray-200">
           <img src={logo} alt="Logo" className="h-10 w-auto mb-2" />
-          <h2 className="text-xl font-bold text-primary">Cphorm</h2>
         </div>
         <nav className="p-4">
           <ul className="space-y-2">
@@ -76,7 +75,7 @@ const Patients = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-800 mb-2 md:mb-0">Patients</h2>
               <button onClick={() => setModalOpen(true)} className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md transition">
-                <span className="material-icons mr-2">add</span>Add Patient
+                <span className="material-icons mr-2"></span>Add Patient
               </button>
             </div>
             <div className="overflow-x-auto rounded-lg border border-gray-200">

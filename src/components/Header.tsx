@@ -12,7 +12,6 @@ const Header = () => {
             alt="Logo" 
             className="h-12 w-auto"
           />
-          <span className="text-xl font-bold text-midnight">Cphorm</span>
         </div>
         
         <nav className="hidden md:flex items-center space-x-8">
