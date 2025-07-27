@@ -42,7 +42,7 @@ const Features = () => {
             Powerful Features for Modern Healthcare
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover how Cphorm's innovative features can transform your healthcare practice
+            Discover how Cphorm's features can transform your healthcare practice
           </p>
         </div>
         

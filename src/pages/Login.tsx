@@ -18,38 +18,24 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error);
-
-      // Save to localStorage (same as original)
-      localStorage.setItem('user_id', result.user_id);
-      localStorage.setItem('username', result.username);
-
+    // Static credentials
+    if (formData.email === "ahmed@offsechq.com" && formData.password === "mypassword") {
+      localStorage.setItem('user_id', '1');
+      localStorage.setItem('username', 'Ahmed');
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
-
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (error: any) {
-      setError('Login failed: ' + error.message);
-    } finally {
-      setIsLoading(false);
+      navigate('/patients');
+    } else {
+      setError('Invalid email or password.');
     }
+    setIsLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
