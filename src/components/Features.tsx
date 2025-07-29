@@ -35,13 +35,13 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-20 bg-background">
+    <section id="features" className="py-20 bg-background dark:bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-midnight mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 animate-fade-in-up">
             Powerful Features for Modern Healthcare
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-in-up-delay-100">
             Discover how Cphorm's features can transform your healthcare practice
           </p>
         </div>
@@ -50,16 +50,22 @@ const Features = () => {
           {features.map((feature, index) => (
             <Card 
               key={index} 
-              className="border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-card"
+              className={`border-border hover:shadow-lg dark:hover:shadow-lg dark:hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 bg-card hover:bg-card/80 dark:hover:bg-card/60 group cursor-pointer animate-fade-in-up`}
+              style={{
+                animationDelay: `${index * 0.1}s`,
+                animationFillMode: 'both'
+              }}
             >
               <CardHeader className="text-center pb-4">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <CardTitle className="text-xl font-semibold text-midnight">
+                <div className="text-4xl mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:animate-bounce-in">
+                  {feature.icon}
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                   {feature.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-center leading-relaxed">
+                <p className="text-muted-foreground text-center leading-relaxed group-hover:text-foreground transition-colors duration-300">
                   {feature.description}
                 </p>
               </CardContent>
