@@ -6,12 +6,12 @@ export interface Patient {
   occupation: string;
   address: string;
   phone: string;
-  email: string;
+  // email: string;
   blood_type: string;
   allergies: string[];
   operations: string[];
   createdAt: string;
-  updatedAt: string;
+  // updatedAt?: string;
 }
 
 export interface Vitals {

@@ -11,63 +11,71 @@ import {
 } from "@/components/ui/breadcrumb";
 import { PatientForm } from "@/components/portal/PatientForm";
 import { Patient } from "@/types/medical";
+import { useEffect, useState } from "react";
 
-// Mock data - in real app, this would come from API/state management
-const mockPatients: Patient[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    birthdate: "1985-03-15",
-    gender: "male",
-    occupation: "Engineer",
-    address: "123 Main St, Springfield, IL 62701",
-    phone: "+1 (555) 123-4567",
-    email: "john.smith@email.com",
-    bloodType: "O+",
-    allergies: ["Penicillin", "Peanuts"],
-    previousOperations: ["Appendectomy (2010)"],
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    name: "Mary Johnson",
-    birthdate: "1978-11-22",
-    gender: "female",
-    occupation: "Teacher",
-    address: "456 Oak Ave, Springfield, IL 62702",
-    phone: "+1 (555) 987-6543",
-    email: "mary.johnson@email.com",
-    bloodType: "A+",
-    allergies: ["Latex"],
-    previousOperations: [],
-    createdAt: "2024-01-10T14:20:00Z",
-    updatedAt: "2024-01-10T14:20:00Z",
-  },
-  {
-    id: "3",
-    name: "Robert Davis",
-    birthdate: "1965-07-08",
-    gender: "male",
-    occupation: "Retired",
-    address: "789 Pine St, Springfield, IL 62703",
-    phone: "+1 (555) 555-0123",
-    email: "robert.davis@email.com",
-    bloodType: "B-",
-    allergies: [],
-    previousOperations: ["Knee Surgery (2018)", "Cataract Surgery (2020)"],
-    createdAt: "2024-01-05T09:15:00Z",
-    updatedAt: "2024-01-05T09:15:00Z",
-  },
-];
-
+// Replace mock data with API fetching
 export function PatientEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const patient = mockPatients.find((p) => p.id === id);
+  useEffect(() => {
+    async function fetchPatient() {
+      setLoading(true);
+      setNotFound(false);
+      try {
+        const res = await fetch(
+          `https://cphorme_be.cphorme.workers.dev/api/v1/patient/${id}`
+        );
+        if (!res.ok) {
+          setNotFound(true);
+          setPatient(null);
+        } else {
+          const data = await res.json();
+          setPatient(data[0]);
+        }
+      } catch {
+        setNotFound(true);
+        setPatient(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (id) fetchPatient();
+  }, [id]);
 
-  if (!patient) {
+  async function handleUpdate(updatedPatient: Patient) {
+    try {
+      const res = await fetch(
+        `https://cphorme_be.cphorme.workers.dev/api/v1/patient/update/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedPatient),
+        }
+      );
+      if (res.ok) {
+        navigate(`/patients/${id}`);
+      } else {
+        // handle error (could show a toast or error message)
+        alert("Failed to update patient.");
+      }
+    } catch {
+      alert("Failed to update patient.");
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (notFound || !patient) {
     return (
       <div className="text-center py-8">
         <h1 className="text-2xl font-bold mb-2">Patient Not Found</h1>
@@ -128,7 +136,7 @@ export function PatientEdit() {
         </Button>
       </div>
 
-      <PatientForm patient={patient} isEditing={true} />
+      <PatientForm patient={patient} isEditing={true} onSubmit={handleUpdate} />
     </div>
   );
 }

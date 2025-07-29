@@ -236,13 +236,23 @@ export function PatientDetail() {
               </div>
             </div>
 
-            {/* <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-3">
+              <Phone className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{patient.email}</p>
+                <p className="text-sm text-muted-foreground">
+                  Emergency Contact
+                </p>
+                <p className="font-medium">{patient.emergency_contact}</p>
               </div>
-            </div> */}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Origin State</p>
+                <p className="font-medium">{patient.origin_state}</p>
+              </div>
+            </div>
 
             <div className="flex items-start gap-3">
               <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
