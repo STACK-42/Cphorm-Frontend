@@ -28,7 +28,7 @@ const navigationItems = [
   { title: "Patients", url: "/patients", icon: Users },
   { title: "Add Patient", url: "/add-patient", icon: UserPlus },
   { title: "Reports", url: "/reports", icon: FileText },
-  { title: "Vitals", url: "/vitals", icon: Activity },
+  // { title: "Vitals", url: "/vitals", icon: Activity },
 ];
 
 const settingsItems = [

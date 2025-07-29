@@ -21,6 +21,7 @@ import PatientEditPage from "./pages/portal/PatientEditPage";
 import AddPatientPage from "./pages/portal/AddPatientPage";
 import ReportsPage from "./pages/portal/ReportsPage";
 import AddReportPage from "./pages/portal/AddReportPage";
+import ReportDetailsPage from "./pages/portal/ReportDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,15 @@ const App = () => (
               </PortalLayout>
             }
           />
+          <Route
+            path="/reports/:id"
+            element={
+              <PortalLayout>
+                <ReportDetailsPage />
+              </PortalLayout>
+            }
+          />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
