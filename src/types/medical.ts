@@ -1,15 +1,15 @@
 export interface Patient {
   id: string;
   name: string;
-  birthdate: string;
+  date_of_birth: string;
   gender: 'male' | 'female' | 'other';
   occupation: string;
   address: string;
   phone: string;
   email: string;
-  bloodType: string;
+  blood_type: string;
   allergies: string[];
-  previousOperations: string[];
+  operations: string[];
   createdAt: string;
   updatedAt: string;
 }

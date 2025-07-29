@@ -11,6 +11,7 @@ import {
   Calendar,
   Droplets,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Simple UI Components for demo
 const Button = ({
@@ -111,13 +112,10 @@ const TableCell = ({ children, className = "" }) => (
   <td className={`px-6 py-4 whitespace-nowrap ${className}`}>{children}</td>
 );
 
-// Navigation mock
-const navigate = (path) => {
-  console.log("Navigate to:", path);
-  alert(`Would navigate to: ${path}`);
-};
+// Navigation
 
 export function PatientList() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [patients, setPatients] = useState([]);
   const [isMobileView, setIsMobileView] = useState(false);
