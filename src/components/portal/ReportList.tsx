@@ -12,6 +12,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { report } from "process";
+import { useNavigate } from "react-router-dom";
 
 // Simple UI Components for demo
 const Button = ({
@@ -115,10 +116,6 @@ const TableCell = ({ children, className = "" }) => (
 );
 
 // Navigation mock
-const navigate = (path) => {
-  console.log("Navigate to:", path);
-  alert(`Would navigate to: ${path}`);
-};
 
 export function ReportList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,6 +123,7 @@ export function ReportList() {
   const [isMobileView, setIsMobileView] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch reports from API
   useEffect(() => {
@@ -289,7 +287,9 @@ export function ReportList() {
                   : "No assessment"}
               </span>
             </div>
-            {report.vitals && (
+            {report.vitals &&
+            Array.isArray(report.vitals) &&
+            report.vitals.length > 0 ? (
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
@@ -298,7 +298,7 @@ export function ReportList() {
                   {report.vitals[0].temperature || "N/A"}°C
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="flex items-center justify-between">
@@ -528,7 +528,9 @@ export function ReportList() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {report.vitals ? (
+                              {report.vitals &&
+                              Array.isArray(report.vitals) &&
+                              report.vitals.length > 0 ? (
                                 <div className="text-sm">
                                   <div>
                                     BP: {report.vitals[0].bp_systolic || "N/A"}/

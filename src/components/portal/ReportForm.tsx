@@ -1,10 +1,11 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useState } from 'react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -12,96 +13,247 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { COMMON_DISEASES } from '@/types/medical';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/select";
+import { COMMON_DISEASES, MedicalReport, Vitals } from "@/types/medical";
+import { useToast } from "@/hooks/use-toast";
+
+// Constant doctor ID
+const DOCTOR_ID = "5a2f0bc2-6f27-4ab0-8418-e505a08b07e4";
 
 const reportSchema = z.object({
-  patientId: z.string().min(1, 'Please select a patient'),
-  subjective: z.string().min(10, 'Subjective findings must be at least 10 characters'),
-  assessment: z.string().min(10, 'Assessment must be at least 10 characters'),
-  treatmentPlan: z.string().min(10, 'Treatment plan must be at least 10 characters'),
-  medication: z.string().min(1, 'Medication information is required'),
-  diagnosis: z.string().min(1, 'Please select a diagnosis'),
+  patient_id: z.string().min(1, "Please select a patient"),
+  subjective: z
+    .string()
+    .min(10, "Subjective findings must be at least 10 characters"),
+  assessment: z.string().min(10, "Assessment must be at least 10 characters"),
+  plan: z.string().min(10, "Treatment plan must be at least 10 characters"),
+  medications: z.string().min(1, "Medication information is required"),
+  diagnosis: z.string().min(1, "Please select a diagnosis"),
   // Vitals
   height: z.number().min(30).max(300),
   weight: z.number().min(1).max(500),
   temperature: z.number().min(30).max(45),
-  bloodPressureSystolic: z.number().min(70).max(250),
-  bloodPressureDiastolic: z.number().min(40).max(150),
+  bp_systolic: z.number().min(70).max(250),
+  bp_diastolic: z.number().min(40).max(150),
 });
 
 type ReportFormData = z.infer<typeof reportSchema>;
 
-// Mock patients for selection
-const mockPatients = [
-  { id: '1', name: 'John Smith' },
-  { id: '2', name: 'Mary Johnson' },
-  { id: '3', name: 'Robert Davis' },
-];
+interface ReportFormProps {
+  report?: unknown;
+  isEditing?: boolean;
+}
 
-export function ReportForm() {
+export function ReportForm({ report, isEditing = false }: ReportFormProps) {
   const { toast } = useToast();
-  const [selectedPatient, setSelectedPatient] = useState<string>('');
+  const navigate = useNavigate();
+  const [selectedPatient, setSelectedPatient] = useState<string>(
+    report?.patient_id || ""
+  );
+  const [patients, setPatients] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingPatients, setLoadingPatients] = useState(false);
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportSchema),
-    defaultValues: {
-      height: 170,
-      weight: 70,
-      temperature: 37.0,
-      bloodPressureSystolic: 120,
-      bloodPressureDiastolic: 80,
-    },
+    defaultValues: report
+      ? {
+          patient_id: report.patient_id || "",
+          subjective: report.subjective || "",
+          assessment: report.assessment || "",
+          plan: report.plan || "",
+          medications: report.medications || "",
+          diagnosis: report.diagnosis || "",
+          height: report.vitals?.height || 170,
+          weight: report.vitals?.weight || 70,
+          temperature: report.vitals?.temperature || 37.0,
+          bp_systolic: report.vitals?.bloodPressureSystolic || 120,
+          bp_diastolic: report.vitals?.bloodPressureDiastolic || 80,
+        }
+      : {
+          height: 170,
+          weight: 70,
+          temperature: 37.0,
+          bp_systolic: 120,
+          bp_diastolic: 80,
+        },
   });
 
-  const onSubmit = (data: ReportFormData) => {
+  // Fetch patients from API
+  useEffect(() => {
+    setLoadingPatients(true);
+    fetch("https://cphorme_be.cphorme.workers.dev/api/v1/patient")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch patients");
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          setPatients(Array.isArray(data) ? data : []);
+        } catch (parseError) {
+          throw new Error("Invalid JSON response from server");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching patients:", err);
+        toast({
+          title: "Error",
+          description: "Failed to load patients. Please refresh the page.",
+          variant: "destructive",
+        });
+        setPatients([]);
+      })
+      .finally(() => setLoadingPatients(false));
+  }, [toast]);
+
+  const onSubmit = async (data: ReportFormData) => {
+    console.log("onSubmit called with data:", data);
+    setIsSubmitting(true);
+
     const reportData = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      doctorName: 'Dr. Sarah Johnson',
+      patient_id: data.patient_id,
+      doctor_id: DOCTOR_ID, // Add the constant doctor ID
+      subjective: data.subjective,
+      assessment: data.assessment,
+      plan: data.plan,
+      medications: data.medications,
+      diagnosis: data.diagnosis,
       vitals: {
         height: data.height,
         weight: data.weight,
         temperature: data.temperature,
-        bloodPressureSystolic: data.bloodPressureSystolic,
-        bloodPressureDiastolic: data.bloodPressureDiastolic,
+        bloodPressureSystolic: data.bp_systolic,
+        bloodPressureDiastolic: data.bp_diastolic,
         recordedAt: new Date().toISOString(),
       },
     };
 
-    console.log('Report data:', reportData);
-    
-    toast({
-      title: "Report Created Successfully",
-      description: "Medical report has been saved to the patient's record.",
-    });
+    try {
+      let response;
 
-    form.reset();
-    setSelectedPatient('');
+      if (isEditing && report) {
+        // Update existing report
+        response = await fetch(
+          `https://cphorme_be.cphorme.workers.dev/api/v1/reports/${report.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
+      } else {
+        // Create new report
+        response = await fetch(
+          "https://cphorme_be.cphorme.workers.dev/api/v1/report",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
+      }
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `Failed to ${isEditing ? "update" : "create"} report: ${errorData}`
+        );
+      }
+
+      const savedReport = await response.json();
+
+      console.log(
+        isEditing
+          ? "Report updated successfully:"
+          : "Report created successfully:",
+        savedReport
+      );
+
+      toast({
+        title: isEditing
+          ? "Report Updated Successfully"
+          : "Report Created Successfully",
+        description: `Medical report has been ${
+          isEditing ? "updated" : "saved to the patient's record"
+        }.`,
+      });
+
+      if (isEditing && report) {
+        // Navigate back to report detail page
+        navigate(`/reports/${report.id}`);
+      } else {
+        // Navigate to the new report's detail page or reset form
+        if (savedReport.id) {
+          navigate(`/reports/${savedReport.id}`);
+        } else {
+          // Fallback: reset form for new report
+          form.reset({
+            patient_id: "",
+            subjective: "",
+            assessment: "",
+            plan: "",
+            medications: "",
+            diagnosis: "",
+            height: 170,
+            weight: 70,
+            temperature: 37.0,
+            bp_systolic: 120,
+            bp_diastolic: 80,
+          });
+          setSelectedPatient("");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving report:", error);
+      toast({
+        title: "Error",
+        description: `Failed to ${
+          isEditing ? "update" : "create"
+        } report. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Create Medical Report</h1>
+        <h1 className="text-2xl font-bold">
+          {isEditing ? "Edit Medical Report" : "Create Medical Report"}
+        </h1>
         <p className="text-muted-foreground">
-          Generate a comprehensive medical report for a patient
+          {isEditing
+            ? "Update the medical report details"
+            : "Generate a comprehensive medical report for a patient"}
         </p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            console.log("Form validation errors:", errors);
+            toast({
+              title: "Validation Error",
+              description: "Please check all required fields and try again.",
+              variant: "destructive",
+            });
+          })}
+          className="space-y-6"
+        >
           {/* Patient Selection */}
           <Card>
             <CardHeader>
@@ -110,25 +262,44 @@ export function ReportForm() {
             <CardContent>
               <FormField
                 control={form.control}
-                name="patientId"
+                name="patient_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select Patient</FormLabel>
-                    <Select onValueChange={(value) => {
-                      field.onChange(value);
-                      setSelectedPatient(value);
-                    }} defaultValue={field.value}>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedPatient(value);
+                      }}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Choose a patient" />
+                          <SelectValue
+                            placeholder={
+                              loadingPatients
+                                ? "Loading patients..."
+                                : "Choose a patient"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {mockPatients.map((patient) => (
-                          <SelectItem key={patient.id} value={patient.id}>
-                            {patient.name}
+                        {loadingPatients ? (
+                          <SelectItem value="loading" disabled>
+                            Loading patients...
                           </SelectItem>
-                        ))}
+                        ) : patients.length > 0 ? (
+                          patients.map((patient) => (
+                            <SelectItem key={patient.id} value={patient.id}>
+                              {patient.name || "Unknown Patient"}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-patients" disabled>
+                            No patients available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -152,11 +323,13 @@ export function ReportForm() {
                     <FormItem>
                       <FormLabel>Height (cm)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           placeholder="170"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -171,11 +344,13 @@ export function ReportForm() {
                     <FormItem>
                       <FormLabel>Weight (kg)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           placeholder="70"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -190,12 +365,14 @@ export function ReportForm() {
                     <FormItem>
                       <FormLabel>Temperature (°C)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           step="0.1"
                           placeholder="37.0"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -205,16 +382,18 @@ export function ReportForm() {
 
                 <FormField
                   control={form.control}
-                  name="bloodPressureSystolic"
+                  name="bp_systolic"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Systolic BP (mmHg)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           placeholder="120"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -224,16 +403,18 @@ export function ReportForm() {
 
                 <FormField
                   control={form.control}
-                  name="bloodPressureDiastolic"
+                  name="bp_diastolic"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Diastolic BP (mmHg)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           placeholder="80"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -257,10 +438,10 @@ export function ReportForm() {
                   <FormItem>
                     <FormLabel>Subjective (Patient's Description)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Patient reports symptoms, concerns, and history..."
                         className="min-h-[120px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -275,10 +456,10 @@ export function ReportForm() {
                   <FormItem>
                     <FormLabel>Assessment (Clinical Findings)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Physical examination findings, test results, clinical judgment..."
                         className="min-h-[120px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -288,15 +469,15 @@ export function ReportForm() {
 
               <FormField
                 control={form.control}
-                name="treatmentPlan"
+                name="plan"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Treatment Plan</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Proposed treatment approach, follow-up care, patient education..."
                         className="min-h-[120px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -318,7 +499,10 @@ export function ReportForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Primary Diagnosis</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select primary diagnosis" />
@@ -339,15 +523,15 @@ export function ReportForm() {
 
               <FormField
                 control={form.control}
-                name="medication"
+                name="medications"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Medication & Dosage</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Prescribed medications, dosages, frequency, duration..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -361,10 +545,14 @@ export function ReportForm() {
             <Button type="submit" className="flex-1 md:flex-none">
               Create Report
             </Button>
-            <Button type="button" variant="outline" onClick={() => {
-              form.reset();
-              setSelectedPatient('');
-            }}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                form.reset();
+                setSelectedPatient("");
+              }}
+            >
               Reset Form
             </Button>
           </div>

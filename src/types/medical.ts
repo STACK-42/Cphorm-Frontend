@@ -15,21 +15,26 @@ export interface Patient {
 }
 
 export interface Vitals {
+  id: number;
   height: number; // in cm
   weight: number; // in kg
   temperature: number; // in celsius
-  bloodPressureSystolic: number;
-  bloodPressureDiastolic: number;
-  recordedAt: string;
+  bp_systolic: number;
+  bp_diastolic: number;
+  created_at: string;
+  respiratory_rate?: number;
+  heart_rate?: number;
 }
 
 export interface MedicalReport {
   id: string;
-  patientId: string;
+  created_at?: string;
+  patient_id: string;
+  doctor_id: string;
   subjective: string;
   assessment: string;
-  treatmentPlan: string;
-  medication: string;
+  plan: string;
+  medications?: string;
   diagnosis: string;
   vitals: Vitals;
   createdAt: string;
