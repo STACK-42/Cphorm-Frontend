@@ -1,9 +1,18 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, Edit, ArrowLeft, FileText, Calendar, Phone, Mail, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Eye,
+  Edit,
+  ArrowLeft,
+  FileText,
+  Calendar,
+  Phone,
+  Mail,
+  MapPin,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,55 +20,55 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { Patient } from '@/types/medical';
+} from "@/components/ui/breadcrumb";
+import { Patient } from "@/types/medical";
 
 // Mock data - in real app, this would come from API/state management
 const mockPatients: Patient[] = [
   {
-    id: '1',
-    name: 'John Smith',
-    birthdate: '1985-03-15',
-    gender: 'male',
-    occupation: 'Engineer',
-    address: '123 Main St, Springfield, IL 62701',
-    phone: '+1 (555) 123-4567',
-    email: 'john.smith@email.com',
-    bloodType: 'O+',
-    allergies: ['Penicillin', 'Peanuts'],
-    previousOperations: ['Appendectomy (2010)'],
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
+    id: "1",
+    name: "John Smith",
+    birthdate: "1985-03-15",
+    gender: "male",
+    occupation: "Engineer",
+    address: "123 Main St, Springfield, IL 62701",
+    phone: "+1 (555) 123-4567",
+    email: "john.smith@email.com",
+    bloodType: "O+",
+    allergies: ["Penicillin", "Peanuts"],
+    previousOperations: ["Appendectomy (2010)"],
+    createdAt: "2024-01-15T10:30:00Z",
+    updatedAt: "2024-01-15T10:30:00Z",
   },
   {
-    id: '2',
-    name: 'Mary Johnson',
-    birthdate: '1978-11-22',
-    gender: 'female',
-    occupation: 'Teacher',
-    address: '456 Oak Ave, Springfield, IL 62702',
-    phone: '+1 (555) 987-6543',
-    email: 'mary.johnson@email.com',
-    bloodType: 'A+',
-    allergies: ['Latex'],
+    id: "2",
+    name: "Mary Johnson",
+    birthdate: "1978-11-22",
+    gender: "female",
+    occupation: "Teacher",
+    address: "456 Oak Ave, Springfield, IL 62702",
+    phone: "+1 (555) 987-6543",
+    email: "mary.johnson@email.com",
+    bloodType: "A+",
+    allergies: ["Latex"],
     previousOperations: [],
-    createdAt: '2024-01-10T14:20:00Z',
-    updatedAt: '2024-01-10T14:20:00Z',
+    createdAt: "2024-01-10T14:20:00Z",
+    updatedAt: "2024-01-10T14:20:00Z",
   },
   {
-    id: '3',
-    name: 'Robert Davis',
-    birthdate: '1965-07-08',
-    gender: 'male',
-    occupation: 'Retired',
-    address: '789 Pine St, Springfield, IL 62703',
-    phone: '+1 (555) 555-0123',
-    email: 'robert.davis@email.com',
-    bloodType: 'B-',
+    id: "3",
+    name: "Robert Davis",
+    birthdate: "1965-07-08",
+    gender: "male",
+    occupation: "Retired",
+    address: "789 Pine St, Springfield, IL 62703",
+    phone: "+1 (555) 555-0123",
+    email: "robert.davis@email.com",
+    bloodType: "B-",
     allergies: [],
-    previousOperations: ['Knee Surgery (2018)', 'Cataract Surgery (2020)'],
-    createdAt: '2024-01-05T09:15:00Z',
-    updatedAt: '2024-01-05T09:15:00Z',
+    previousOperations: ["Knee Surgery (2018)", "Cataract Surgery (2020)"],
+    createdAt: "2024-01-05T09:15:00Z",
+    updatedAt: "2024-01-05T09:15:00Z",
   },
 ];
 
@@ -67,14 +76,16 @@ export function PatientDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const patient = mockPatients.find(p => p.id === id);
+  const patient = mockPatients.find((p) => p.id === id);
 
   if (!patient) {
     return (
       <div className="text-center py-8">
         <h1 className="text-2xl font-bold mb-2">Patient Not Found</h1>
-        <p className="text-muted-foreground mb-4">The requested patient record could not be found.</p>
-        <Button onClick={() => navigate('/patients')}>
+        <p className="text-muted-foreground mb-4">
+          The requested patient record could not be found.
+        </p>
+        <Button onClick={() => navigate("/patients")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Patients
         </Button>
@@ -87,19 +98,22 @@ export function PatientDetail() {
     const birth = new Date(birthdate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -109,7 +123,10 @@ export function PatientDetail() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/patients')} className="cursor-pointer">
+            <BreadcrumbLink
+              onClick={() => navigate("/patients")}
+              className="cursor-pointer"
+            >
               Patients
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -154,11 +171,15 @@ export function PatientDetail() {
                 <p className="font-medium">{formatDate(patient.birthdate)}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="h-4 w-4 flex items-center justify-center">
                 <span className="text-xs font-bold text-muted-foreground">
-                  {patient.gender === 'male' ? 'M' : patient.gender === 'female' ? 'F' : 'O'}
+                  {patient.gender === "male"
+                    ? "M"
+                    : patient.gender === "female"
+                    ? "F"
+                    : "O"}
                 </span>
               </div>
               <div>
@@ -169,11 +190,15 @@ export function PatientDetail() {
 
             <div className="flex items-center gap-3">
               <div className="h-4 w-4 flex items-center justify-center">
-                <span className="text-xs font-bold text-muted-foreground">B</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  B
+                </span>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Blood Type</p>
-                <Badge variant="outline" className="mt-1">{patient.bloodType}</Badge>
+                <Badge variant="outline" className="mt-1">
+                  {patient.bloodType}
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -192,7 +217,7 @@ export function PatientDetail() {
                 <p className="font-medium">{patient.phone}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div>
@@ -228,14 +253,18 @@ export function PatientDetail() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground italic">No known allergies</p>
+                <p className="text-muted-foreground italic">
+                  No known allergies
+                </p>
               )}
             </div>
 
             <Separator />
 
             <div>
-              <p className="text-sm text-muted-foreground mb-2">Previous Operations</p>
+              <p className="text-sm text-muted-foreground mb-2">
+                Previous Operations
+              </p>
               {patient.previousOperations.length > 0 ? (
                 <div className="space-y-2">
                   {patient.previousOperations.map((operation, index) => (
@@ -246,7 +275,9 @@ export function PatientDetail() {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground italic">No previous operations</p>
+                <p className="text-muted-foreground italic">
+                  No previous operations
+                </p>
               )}
             </div>
           </CardContent>
@@ -262,7 +293,7 @@ export function PatientDetail() {
               <p className="text-sm text-muted-foreground">Created</p>
               <p className="font-medium">{formatDate(patient.createdAt)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm text-muted-foreground">Last Updated</p>
               <p className="font-medium">{formatDate(patient.updatedAt)}</p>

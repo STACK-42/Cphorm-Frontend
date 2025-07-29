@@ -107,17 +107,17 @@ export function Dashboard() {
                   time: "10:30 AM",
                 },
                 {
-                  name: "Mary Johnson",
+                  name: "Omar Doe",
                   condition: "Diabetes Check",
                   time: "11:15 AM",
                 },
                 {
-                  name: "Robert Davis",
+                  name: "Jane Doe",
                   condition: "Annual Physical",
                   time: "2:00 PM",
                 },
                 {
-                  name: "Lisa Wilson",
+                  name: "Ahmed Musa",
                   condition: "Medication Review",
                   time: "3:30 PM",
                 },

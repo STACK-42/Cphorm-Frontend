@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -11,55 +11,6 @@ import {
   Calendar,
   Droplets,
 } from "lucide-react";
-
-// Mock data for demonstration
-const mockPatients = [
-  {
-    id: "1",
-    name: "John Smith",
-    birthdate: "1985-03-15",
-    gender: "male",
-    occupation: "Engineer",
-    address: "123 Main St, Springfield, IL 62701",
-    phone: "+1 (555) 123-4567",
-    email: "john.smith@email.com",
-    bloodType: "O+",
-    allergies: ["Penicillin", "Peanuts"],
-    previousOperations: ["Appendectomy (2010)"],
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "2",
-    name: "Mary Johnson",
-    birthdate: "1978-11-22",
-    gender: "female",
-    occupation: "Teacher",
-    address: "456 Oak Ave, Springfield, IL 62702",
-    phone: "+1 (555) 987-6543",
-    email: "mary.johnson@email.com",
-    bloodType: "A+",
-    allergies: ["Latex"],
-    previousOperations: [],
-    createdAt: "2024-01-10T14:20:00Z",
-    updatedAt: "2024-01-10T14:20:00Z",
-  },
-  {
-    id: "3",
-    name: "Robert Davis",
-    birthdate: "1965-07-08",
-    gender: "male",
-    occupation: "Retired",
-    address: "789 Pine St, Springfield, IL 62703",
-    phone: "+1 (555) 555-0123",
-    email: "robert.davis@email.com",
-    bloodType: "B-",
-    allergies: [],
-    previousOperations: ["Knee Surgery (2018)", "Cataract Surgery (2020)"],
-    createdAt: "2024-01-05T09:15:00Z",
-    updatedAt: "2024-01-05T09:15:00Z",
-  },
-];
 
 // Simple UI Components for demo
 const Button = ({
@@ -168,38 +119,77 @@ const navigate = (path) => {
 
 export function PatientList() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [patients] = useState(mockPatients);
+  const [patients, setPatients] = useState([]);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredPatients = patients.filter(
-    (patient) =>
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.includes(searchTerm)
-  );
+  // Fetch patients from API
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetch("https://cphorme_be.cphorme.workers.dev/api/v1/patient")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to fetch patients");
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          // Ensure we have an array
+          setPatients(Array.isArray(data) ? data : []);
+        } catch (parseError) {
+          throw new Error("Invalid JSON response from server");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Error fetching patients");
+        setPatients([]); // Ensure patients is always an array
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredPatients = Array.isArray(patients)
+    ? patients.filter(
+        (patient) =>
+          (patient.name &&
+            patient.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (patient.email &&
+            patient.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (patient.phone && patient.phone.includes(searchTerm))
+      )
+    : [];
 
   const calculateAge = (birthdate) => {
-    const today = new Date();
-    const birth = new Date(birthdate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
+    if (!birthdate) return "N/A";
+    try {
+      const today = new Date();
+      const birth = new Date(birthdate);
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
 
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+      ) {
+        age--;
+      }
+      return isNaN(age) ? "N/A" : age;
+    } catch (error) {
+      return "N/A";
     }
-
-    return age;
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (error) {
+      return "N/A";
+    }
   };
 
   // Mobile Patient Card Component
@@ -208,9 +198,11 @@ export function PatientList() {
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg">{patient.name}</h3>
+            <h3 className="font-semibold text-lg">
+              {patient.name || "Unknown"}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              {patient.occupation}
+              {patient.occupation || "N/A"}
             </p>
           </div>
           <div className="flex gap-2 ml-4">
@@ -237,13 +229,14 @@ export function PatientList() {
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm">
-              {calculateAge(patient.birthdate)} yrs, {patient.gender}
+              {calculateAge(patient.date_of_birth)} yrs,{" "}
+              {patient.gender || "N/A"}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-muted-foreground" />
             <Badge variant="outline" className="text-xs">
-              {patient.bloodType}
+              {patient.blood_type || "N/A"}
             </Badge>
           </div>
         </div>
@@ -251,23 +244,27 @@ export function PatientList() {
         <div className="space-y-2 mb-3">
           <div className="flex items-center gap-2">
             <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{patient.phone}</span>
+            <span className="text-sm">{patient.phone || "N/A"}</span>
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground truncate">
-              {patient.email}
+              {patient.email || "N/A"}
             </span>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            {patient.allergies.length > 0 ? (
+            {patient.allergies &&
+            Array.isArray(patient.allergies) &&
+            patient.allergies.length > 0 ? (
               <div className="flex flex-wrap gap-1">
                 {patient.allergies.slice(0, 2).map((allergy, index) => (
                   <Badge key={index} variant="destructive" className="text-xs">
-                    {allergy}
+                    {typeof allergy === "string"
+                      ? allergy
+                      : allergy.allergen || "Unknown"}
                   </Badge>
                 ))}
                 {patient.allergies.length > 2 && (
@@ -349,187 +346,231 @@ export function PatientList() {
         </CardContent>
       </Card>
 
-      {/* Patient Statistics */}
-      <div className="grid gap-3 grid-cols-3 md:gap-4">
+      {/* Loading/Error */}
+      {loading && (
         <Card>
-          <CardContent className="p-3 md:p-4">
-            <div className="text-lg md:text-2xl font-bold">
-              {patients.length}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">Total</p>
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Loading patients...</p>
           </CardContent>
         </Card>
+      )}
+      {error && (
         <Card>
-          <CardContent className="p-3 md:p-4">
-            <div className="text-lg md:text-2xl font-bold">
-              {patients.filter((p) => p.allergies.length > 0).length}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Allergies
-            </p>
+          <CardContent className="p-8 text-center">
+            <p className="text-red-500">{error}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-4">
-            <div className="text-lg md:text-2xl font-bold">
-              {patients.filter((p) => p.previousOperations.length > 0).length}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Operations
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
-      {/* Mobile Card View (default on mobile, optional on desktop) */}
-      <div className="block md:hidden">
-        {filteredPatients.length > 0 ? (
-          filteredPatients.map((patient) => (
-            <PatientCard key={patient.id} patient={patient} />
-          ))
-        ) : (
+      {/* Patient Statistics */}
+      {!loading && !error && (
+        <div className="grid gap-3 grid-cols-3 md:gap-4">
           <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">
-                No patients found matching your search.
+            <CardContent className="p-3 md:p-4">
+              <div className="text-lg md:text-2xl font-bold">
+                {patients.length}
+              </div>
+              <p className="text-xs md:text-sm text-muted-foreground">Total</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 md:p-4">
+              <div className="text-lg md:text-2xl font-bold">
+                {
+                  patients.filter(
+                    (p) =>
+                      p.allergies &&
+                      Array.isArray(p.allergies) &&
+                      p.allergies.length > 0
+                  ).length
+                }
+              </div>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Allergies
               </p>
             </CardContent>
           </Card>
-        )}
-      </div>
-
-      {/* Desktop Table View or Card View */}
-      <div className="hidden md:block">
-        {isMobileView ? (
-          <div>
-            {filteredPatients.length > 0 ? (
-              filteredPatients.map((patient) => (
-                <PatientCard key={patient.id} patient={patient} />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">
-                    No patients found matching your search.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        ) : (
           <Card>
-            <CardHeader>
-              <CardTitle>Patient Records</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Gender</TableHead>
-                      <TableHead>Blood Type</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Allergies</TableHead>
-                      <TableHead>Last Updated</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPatients.map((patient) => (
-                      <TableRow key={patient.id}>
-                        <TableCell className="font-medium">
-                          <div>
-                            <div>{patient.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {patient.occupation}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{calculateAge(patient.birthdate)}</TableCell>
-                        <TableCell className="capitalize">
-                          {patient.gender}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{patient.bloodType}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            <div>{patient.phone}</div>
-                            <div className="text-muted-foreground">
-                              {patient.email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {patient.allergies.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {patient.allergies
-                                .slice(0, 2)
-                                .map((allergy, index) => (
-                                  <Badge
-                                    key={index}
-                                    variant="destructive"
-                                    className="text-xs"
-                                  >
-                                    {allergy}
-                                  </Badge>
-                                ))}
-                              {patient.allergies.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{patient.allergies.length - 2}
-                                </Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">
-                              None
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {formatDate(patient.updatedAt)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                navigate(`/patients/${patient.id}`)
-                              }
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                navigate(`/patients/${patient.id}/edit`)
-                              }
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+            <CardContent className="p-3 md:p-4">
+              <div className="text-lg md:text-2xl font-bold">
+                {
+                  patients.filter(
+                    (p) =>
+                      p.operations &&
+                      Array.isArray(p.operations) &&
+                      p.operations.length > 0
+                  ).length
+                }
               </div>
-
-              {filteredPatients.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    No patients found matching your search.
-                  </p>
-                </div>
-              )}
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Operations
+              </p>
             </CardContent>
           </Card>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Mobile Card View (default on mobile, optional on desktop) */}
+      {!loading && !error && (
+        <div className="block md:hidden">
+          {filteredPatients.length > 0 ? (
+            filteredPatients.map((patient) => (
+              <PatientCard key={patient.id} patient={patient} />
+            ))
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">
+                  No patients found matching your search.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Desktop Table View or Card View */}
+      {!loading && !error && (
+        <div className="hidden md:block">
+          {isMobileView ? (
+            <div>
+              {filteredPatients.length > 0 ? (
+                filteredPatients.map((patient) => (
+                  <PatientCard key={patient.id} patient={patient} />
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">
+                      No patients found matching your search.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Patient Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Age</TableHead>
+                        <TableHead>Gender</TableHead>
+                        <TableHead>Blood Type</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Allergies</TableHead>
+                        {/* <TableHead>Last Updated</TableHead> */}
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPatients.map((patient) => (
+                        <TableRow key={patient.id}>
+                          <TableCell className="font-medium">
+                            <div>
+                              <div>{patient.name || "Unknown"}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {patient.occupation || "N/A"}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {calculateAge(patient.date_of_birth)}
+                          </TableCell>
+                          <TableCell className="capitalize">
+                            {patient.gender || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {patient.blood_type || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <div>{patient.phone || "N/A"}</div>
+                              {/* <div className="text-muted-foreground">
+                                {patient.email || "N/A"}
+                              </div> */}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {patient.allergies &&
+                            Array.isArray(patient.allergies) &&
+                            patient.allergies.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {patient.allergies
+                                  .slice(0, 2)
+                                  .map((allergy, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="destructive"
+                                      className="text-xs"
+                                    >
+                                      {typeof allergy === "string"
+                                        ? allergy
+                                        : allergy.allergen || "Unknown"}
+                                    </Badge>
+                                  ))}
+                                {patient.allergies.length > 2 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{patient.allergies.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">
+                                None
+                              </span>
+                            )}
+                          </TableCell>
+                          {/* <TableCell className="text-sm">
+                            {formatDate(patient.updatedAt)}
+                          </TableCell> */}
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  navigate(`/patients/${patient.id}`)
+                                }
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  navigate(`/patients/${patient.id}/edit`)
+                                }
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {filteredPatients.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      No patients found matching your search.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 }
