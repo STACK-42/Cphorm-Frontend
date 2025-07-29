@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -11,7 +17,7 @@ import Footer from "@/components/Footer";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,31 +30,41 @@ const Login = () => {
     setError("");
 
     // Static credentials
-    if (formData.email === "ahmed@offsechq.com" && formData.password === "mypassword") {
-      localStorage.setItem('user_id', '1');
-      localStorage.setItem('username', 'Ahmed');
+    if (
+      formData.email === "ahmed@offsechq.com" &&
+      formData.password === "mypassword"
+    ) {
+      localStorage.setItem("user_id", "1");
+      localStorage.setItem("username", "Ahmed");
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
-      navigate('/patients');
+      navigate("/dashboard");
     } else {
-      setError('Invalid email or password.');
+      setError("Invalid email or password.");
     }
     setIsLoading(false);
   };
+  const handleCardSelection = (userType: string) => {
+    if (userType === "doctor") {
+      navigate("/login/doctor");
+    } else if (userType === "organization") {
+      navigate("/login/organization");
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   return (
     <div className="min-h-screen bg-background font-inter">
       <Header />
-      
+
       <section className="flex items-center justify-center py-16 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
@@ -59,7 +75,7 @@ const Login = () => {
               Access your dashboard and manage your healthcare tools seamlessly.
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             {error && (
               <Alert className="mb-4 border-destructive">
@@ -68,41 +84,27 @@ const Login = () => {
                 </AlertDescription>
               </Alert>
             )}
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full bg-cool-blue hover:bg-cool-blue/90"
-                disabled={isLoading}
+            <div className="flex flex-col p-6">
+              {/* Doctor Card */}
+              <div
+                className="p-3"
+                onClick={() => handleCardSelection("doctor")}
               >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </form>
-            
+                <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 w-full">
+                  Login as Doctor
+                </button>
+              </div>
+              {/* organization Card */}
+              <div
+                className="p-3"
+                onClick={() => handleCardSelection("organization")}
+              >
+                <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 w-full">
+                  Login as Organization
+                </button>
+              </div>
+            </div>
+
             <div className="mt-4 text-center text-sm">
               Don't have an account?{" "}
               <Link to="/signup" className="text-cool-blue hover:underline">
@@ -112,7 +114,7 @@ const Login = () => {
           </CardContent>
         </Card>
       </section>
-      
+
       <Footer />
     </div>
   );

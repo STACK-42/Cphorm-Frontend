@@ -1,0 +1,12 @@
+{
+  "name": "Cphorm",
+  "short_name": "Cphorm",
+  "theme_color": "#000000",
+  "background_color": "#FFFFFF",
+  "display": "fullscreen",
+  "scope": "/",
+  "start_url": "/",
+  "description": "a modern medical system",
+  "orientation": "portrait",
+  "icons": []
+}
