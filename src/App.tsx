@@ -22,6 +22,7 @@ import AddPatientPage from "./pages/portal/AddPatientPage";
 import ReportsPage from "./pages/portal/ReportsPage";
 import AddReportPage from "./pages/portal/AddReportPage";
 import ReportDetailsPage from "./pages/portal/ReportDetailsPage";
+import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    <Analytics/>
   </QueryClientProvider>
 );
 
