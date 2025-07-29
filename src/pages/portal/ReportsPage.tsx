@@ -1,5 +1,5 @@
-import { ReportForm } from "@/components/portal/ReportForm";
+import { ReportList } from "@/components/portal/ReportList";
 
 export default function ReportsPage() {
-  return <ReportForm />;
+  return <ReportList />;
 }

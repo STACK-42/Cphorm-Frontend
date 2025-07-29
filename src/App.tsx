@@ -20,6 +20,7 @@ import PatientDetailPage from "./pages/portal/PatientDetailPage";
 import PatientEditPage from "./pages/portal/PatientEditPage";
 import AddPatientPage from "./pages/portal/AddPatientPage";
 import ReportsPage from "./pages/portal/ReportsPage";
+import AddReportPage from "./pages/portal/AddReportPage";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,14 @@ const App = () => (
             element={
               <PortalLayout>
                 <ReportsPage />
+              </PortalLayout>
+            }
+          />
+          <Route
+            path="/add-report"
+            element={
+              <PortalLayout>
+                <AddReportPage />
               </PortalLayout>
             }
           />
