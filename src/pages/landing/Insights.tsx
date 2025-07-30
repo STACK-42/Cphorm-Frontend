@@ -34,6 +34,8 @@ import {
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 // Dummy data for malaria cases from 2019-2025
 const malariaData = [
@@ -200,9 +202,10 @@ const Insights = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background font-inter">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
+      <Header />
+
+      <div className="bg-card border-b border-border px-6 py-4">
+        <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Activity className="h-6 w-6 text-cool-blue" />
             <h1 className="text-2xl font-bold text-midnight">
@@ -224,17 +227,9 @@ const Insights = () => {
               <Download className="h-4 w-4" />
               Export Report
             </Button>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => navigate("/")}
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="container mx-auto px-6 py-8">
         {/* KPI Cards */}
@@ -455,18 +450,7 @@ const Insights = () => {
         </Card>
       </main>
 
-      <footer className="bg-card border-t border-border py-6 mt-12">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-muted-foreground">
-            Cphorm Analytics | Disease Surveillance System | Data as of July
-            2025
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Note: This dashboard displays simulated data for demonstration
-            purposes only.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
